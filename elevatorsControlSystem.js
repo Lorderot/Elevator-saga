@@ -72,7 +72,7 @@ function ElevatorsControlSystem(elevators, floors, controlSystemStrategy, typeOf
             return newArray;
         }
     };
-    /** Elevator use this service to decide, whether to stiop at the floor.
+    /** Elevator use this service to decide, whether to stop at the floor.
      * Get if any passenger waiting at the floor
      * @param floorNum - is number of the floor.
      * @param direction - is the direction, in which elevator is going
@@ -189,13 +189,16 @@ function ElevatorsControlSystem(elevators, floors, controlSystemStrategy, typeOf
      * @param floor - is object of floor, to which event handlers are bound.
      */
     function bindFloorEvents(floor) {
+        var floorNum = floor.floorNum();
         floor.on("up_button_pressed", function() {
-            floorsQueueUp.push(floor.floorNum());
-            floorUpButtonsTimeMapping[floor.floorNum()] = new Date();
+            LOGGER.debug("Up button was pressed at the floor %s", floorNum);
+            floorsQueueUp.push(floorNum);
+            floorUpButtonsTimeMapping[floorNum] = new Date();
         });
         floor.on("down_button_pressed", function() {
-            floorsQueueDown.push(floor.floorNum());
-            floorDownButtonsTimeMapping[floor.floorNum()] = new Date();
+            LOGGER.debug("Down button was pressed at the floor %s", floorNum);
+            floorsQueueDown.push(floorNum);
+            floorDownButtonsTimeMapping[floorNum] = new Date();
         });
     }
     /**

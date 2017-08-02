@@ -7,6 +7,7 @@
  */
 function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors) {
     var LOGGER = new Logger();
+    LOGGER.level = "debug";
     /* Time to sleep, when elevator is waiting*/
     var idleTime = 100;
     /*Module initialization*/
@@ -130,6 +131,8 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
      * @param floorNum is number of the floor
      */
     function onStoppedAtFloorEvent(floorNum) {
+        LOGGER.debug("Elevator #%s: stopped at floor %s. Up to now next floor is %s",
+            elevator.elevator_id, floorNum, elevator.destinationQueue[0]);
         if (elevator.destinationQueue.length == 0) {
             var floorNumber = strategy.getTheFloorToMove(elevator, passengerTimingsMap);
             if (floorNumber != null) {
@@ -176,6 +179,7 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
         }
     }
     function forcefullyGoAtTheFloor(floorNum) {
+        LOGGER.debug("Elevator #%s: is force to go to floor %s", elevator.elevator_id, floorNum);
         var currentQueue = elevator.destinationQueue;
         elevator.destinationQueue = [];
         goToFloor(floorNum);
@@ -195,7 +199,7 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
     function goToFloor(floorNum) {
         elevator.goToFloor(floorNum);
         var movingDirection = getGoingDirection();
-        LOGGER.debug("Elevator #%s: moves to floor %s. Direction: %s", floorNum, movingDirection);
+        LOGGER.debug("Elevator #%s: moves to floor %s. Direction: %s", elevator.elevator_id, floorNum, movingDirection);
         setGoingDirection(movingDirection);
         var nextGoingDirection = strategy.getNextGoingDirection(elevator, maximumFloors);
         elevatorsControlSystem.passengersWillBePickedUp(floorNum, nextGoingDirection);
@@ -268,8 +272,13 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
      *          false, otherwise
      */
     function decideWhetherToStopElevatorToLetPassengersToExitAtTheFloor(floorNum) {
-        return isTheFloorButtonPressed(floorNum)
+        var isButtonPressed = isTheFloorButtonPressed(floorNum);
+        var decision = isButtonPressed
             && strategy.stopAtTheFloorToLetPassengerGoOut(elevator, passengerTimingsMap);
+        if (isButtonPressed) {
+            LOGGER.trace("Elevator #%s: strategy decision to let passengers out: %s", elevator.elevator_id, decision);
+        }
+        return decision;
     }
     /**
      * Making decision where to stop elevator for picking some passenger up
@@ -279,7 +288,14 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
      *          false, otherwise
      */
     function decideWhetherToStopElevatorToPickSomePassengersUp(floorNum, direction) {
-        return elevatorsControlSystem.isAnyPassengerToPickUp(floorNum, direction)
+        var isAnyPassengerToPickup = elevatorsControlSystem.isAnyPassengerToPickUp(floorNum, direction);
+        LOGGER.debug("Elevator #%s: is any passenger to pick up? floor: %s, direction: %s. Answer: %s",
+            elevator.elevator_id, floorNum, direction, isAnyPassengerToPickup);
+        var decision = isAnyPassengerToPickup
             && strategy.stopAtTheFloorToPickPassengersUp(elevator, passengerTimingsMap);
+        if (isAnyPassengerToPickup) {
+            LOGGER.trace("Elevator #%s: strategy decision to pick up passengers: %s", elevator.elevator_id, decision);
+        }
+        return decision;
     }
 }
