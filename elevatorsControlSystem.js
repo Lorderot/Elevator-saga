@@ -34,6 +34,8 @@ function ElevatorsControlSystem(elevators, floors, controlSystemStrategy, typeOf
             var floorNum = orderedFloors[i];
             var direction = getFloorDirection(floorNum);
             if (!willAnyElevatorBeAtTheFloorSoon(floorNum, direction)) {
+                deleteFloorFromQueue(floorNum, floorsQueueUp);
+                deleteFloorFromQueue(floorNum, floorsQueueDown);
                 return floorNum;
             }
         }
