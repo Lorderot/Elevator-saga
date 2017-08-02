@@ -103,7 +103,7 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
      * @param floorNum is number of the floor
      */
     function onFloorButtonPressedEvent(floorNum) {
-        var buttonPressureDate = elevatorsControlSystem.getDateOfTheButtonPressure(floorNum, getGoingDirection());
+        var buttonPressureDate = elevatorsControlSystem.getDateOfTheButtonPressure(floorNum, getIndicatorDirection());
         if (passengerTimingsMap[floorNum] == null) {
             passengerTimingsMap[floorNum] = buttonPressureDate;
         }
@@ -134,6 +134,8 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
             var floorNumber = strategy.getTheFloorToMove(elevator, passengerTimingsMap);
             if (floorNumber != null) {
                 goToFloor(floorNumber);
+            } else {
+                setGoingDirection();
             }
         }
     }
@@ -192,7 +194,9 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
      */
     function goToFloor(floorNum) {
         elevator.goToFloor(floorNum);
-        setGoingDirection(elevator.destinationDirection());
+        var movingDirection = getGoingDirection();
+        LOGGER.debug("Elevator #%s: moves to floor %s. Direction: %s", floorNum, movingDirection);
+        setGoingDirection(movingDirection);
         var nextGoingDirection = strategy.getNextGoingDirection(elevator, maximumFloors);
         elevatorsControlSystem.passengersWillBePickedUp(floorNum, nextGoingDirection);
     }
@@ -216,11 +220,10 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
         }
     }
     /**
-     * To receive current going direction.
+     * To receive indicator direction.
      * @returns {string} according to set indicators "up"  or "down"  or "both"
-     * If no indicator is set, returns empty string {""}
      */
-    function getGoingDirection() {
+    function getIndicatorDirection() {
         var isGoingUp = elevator.goingUpIndicator();
         var isGoingDown = elevator.goingDownIndicator();
         if (isGoingUp && isGoingDown) {
@@ -233,6 +236,22 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
             return "up";
         }
         return "";
+    }
+
+    /**
+     * To receive direction in which elevator is moving or is going to move.
+     * (base on destinationQueue)
+     *
+     * @returns {string} "up" if destination floor is above current
+     *                   "down" if destination floor is under current
+     */
+    function getGoingDirection() {
+        var currentFloor = elevator.currentFloor();
+        var destination = elevator.destinationQueue[0];
+        if (destination == null) {
+            return "";
+        }
+        return (destination > currentFloor) ? "up" : "down";
     }
     /**
      * @param floorNum is number of the floor
