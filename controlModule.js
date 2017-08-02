@@ -7,7 +7,7 @@
  */
 function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors) {
     var LOGGER = new Logger();
-    LOGGER.level = "debug";
+    LOGGER.level = new DEBUG();
     /* Time to sleep, when elevator is waiting*/
     var idleTime = 100;
     /*Module initialization*/
@@ -276,7 +276,7 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
         var decision = isButtonPressed
             && strategy.stopAtTheFloorToLetPassengerGoOut(elevator, passengerTimingsMap);
         if (isButtonPressed) {
-            LOGGER.trace("Elevator #%s: strategy decision to let passengers out: %s", elevator.elevator_id, decision);
+            LOGGER.info("Elevator #%s: strategy decision to let passengers out: %s", elevator.elevator_id, decision);
         }
         return decision;
     }
@@ -294,7 +294,7 @@ function ControlModule(elevatorsControlSystem, strategy, elevator, maximumFloors
         var decision = isAnyPassengerToPickup
             && strategy.stopAtTheFloorToPickPassengersUp(elevator, passengerTimingsMap);
         if (isAnyPassengerToPickup) {
-            LOGGER.trace("Elevator #%s: strategy decision to pick up passengers: %s", elevator.elevator_id, decision);
+            LOGGER.info("Elevator #%s: strategy decision to pick up passengers: %s", elevator.elevator_id, decision);
         }
         return decision;
     }

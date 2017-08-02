@@ -1,6 +1,6 @@
 function ElevatorsControlSystem(elevators, floors, controlSystemStrategy, typeOfElevatorStrategy) {
     var LOGGER = new Logger();
-    LOGGER.level = "debug";
+    LOGGER.level = new DEBUG();
     /* default strategy resolver */
     var strategyResolver = {
         resolveStrategy: function (strategyType) {
